@@ -1,3 +1,6 @@
+from ast import While
+
+
 board = [
     ["♜", "♞", "♝", "♛", "♚", "♝", "♞", "♜"],
     ["♟", "♟", "♟", "♟", "♟", "♟", "♟", "♟"],
@@ -53,6 +56,59 @@ def move_piece(board, from_row, from_column, to_row, to_column):
 
     board[to_row][to_column] = piece
     board[from_row][from_column] = "·"
+
+def promote_pawn(board, row, column):
+    piece = board[row][column]
+    
+    if piece == "♙" and row == 0:
+
+        while True:
+
+            choice = input("Promote pawn to (Q/R/B/N): ").upper()
+
+            if choice == "Q":
+                board[row][column] = "♕"
+                break
+
+            elif choice == "R":
+                board[row][column] = "♖"
+                break
+
+            elif choice == "B":
+                board[row][column] = "♗"
+                break
+
+            elif choice == "N":
+                board[row][column] = "♘"
+                break
+
+            else:
+                print("Invalid choice. Please choose Q, R, B, or N.")
+
+    elif piece == "♟" and row == 7:
+
+        while True:
+
+            choice = input("Promote pawn to (Q/R/B/N): ").upper()
+
+            if choice == "Q":
+                board[row][column] = "♛"
+                break
+
+            elif choice == "R":
+                board[row][column] = "♜"
+                break
+
+            elif choice == "B":
+                board[row][column] = "♝"
+                break
+
+            elif choice == "N":
+                board[row][column] = "♞"
+                break
+
+            else:
+                print("Invalid choice. Please choose Q, R, B, or N.")
 
 
 def is_valid_pawn_move(
@@ -714,7 +770,7 @@ while game_running:
         continue
 
 
-    # Announce move
+    promote_pawn(board, to_row, to_column)
 
     if captured_piece != "·":
 
