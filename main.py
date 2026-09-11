@@ -28,6 +28,7 @@ files = {
 
 turn = "white"
 game_running = True
+last_move = None
 
 
 def print_board():
@@ -387,12 +388,12 @@ def is_valid_move(
     from_row,
     from_column,
     to_row,
-    to_column
+    to_column,turn,last_move
 ):
 
     if piece == "♙" or piece == "♟":
 
-        return is_valid_pawn_move(
+        normal_pawn_move =is_valid_pawn_move(
             board,
             piece,
             from_row,
@@ -400,6 +401,14 @@ def is_valid_move(
             to_row,
             to_column
         )
+
+        en_passant_move = is_valid_en_passant(board,from_row, from_column, to_row, to_column, turn,last_move)
+
+
+        return normal_pawn_move or en_passant_move    
+
+
+
 
     elif piece == "♖" or piece == "♜":
 
@@ -591,7 +600,7 @@ def is_in_check(board, color):
     return False
 
 
-def has_legal_move(board, color):
+def has_legal_move(board, color, last_move):
 
     if color == "white":
         own_pieces = white_pieces
@@ -619,7 +628,7 @@ def has_legal_move(board, color):
                         row,
                         column,
                         to_row,
-                        to_column
+                        to_column,color, last_move
                     )
 
                     if not valid_move:
@@ -654,6 +663,71 @@ def has_legal_move(board, color):
 
     return False
 
+def was_two_square_pawn_move(last_move):
+
+    if last_move is None:
+        return False
+
+    if last_move["piece"] not in ["♙", "♟"]:
+        return False
+
+    if abs(last_move["to_row"] - last_move["from_row"]) != 2:
+        return False
+
+    return True
+
+def is_valid_en_passant(board, from_row, from_column, to_row, to_column, turn, last_move):
+
+    if not was_two_square_pawn_move(last_move):
+        return False
+
+    moving_piece = board[from_row][from_column]
+
+    if turn == "white" and moving_piece != "♙":
+        return False
+
+    if turn == "black" and moving_piece != "♟":
+        return False
+
+    if abs(to_column - from_column) != 1:
+        return False
+
+    if board[to_row][to_column] != "·":
+        return False
+
+    if turn == "white" and to_row != from_row - 1:
+        return False
+
+    if turn == "black" and to_row != from_row + 1:
+        return False
+
+    captured_row = from_row
+    captured_column = to_column
+
+    captured_piece = board[captured_row][captured_column]
+
+    if turn == "white" and captured_piece != "♟":
+        return False
+
+    if turn == "black" and captured_piece != "♙":
+        return False
+
+    if last_move["to_row"] != captured_row:
+        return False
+
+    if last_move["to_column"] != captured_column:
+        return False
+
+    return True
+
+def perform_en_passant(board, from_row, from_column, to_row, to_column):
+
+    captured_row = from_row
+    captured_column = to_column
+
+    board[to_row][to_column] = board[from_row][from_column]
+    board[from_row][from_column] = "·"
+    board[captured_row][captured_column] = "·"
 
 while game_running:
 
@@ -732,7 +806,7 @@ while game_running:
         from_row,
         from_column,
         to_row,
-        to_column
+        to_column,turn,last_move
     )
 
 
@@ -748,7 +822,31 @@ while game_running:
     captured_piece = board[to_row][to_column]
 
 
-    # Make the move
+    en_passant_move = is_valid_en_passant(board, from_row, from_column, to_row, to_column, turn, last_move)
+
+if en_passant_move:
+
+    captured_row = from_row
+    captured_column = to_column
+    en_passant_captured_piece = board[captured_row][captured_column]
+
+
+else:
+    captured_row = None
+    captured_column = None
+    en_passant_captured_piece = None
+
+if en_passant_move:
+
+    perform_en_passant(
+        board,
+        from_row,
+        from_column,
+        to_row,
+        to_column
+    )
+
+else:
 
     move_piece(
         board,
@@ -758,16 +856,26 @@ while game_running:
         to_column
     )
 
+if is_in_check(board, turn):
 
-    # Check whether the move leaves our king in check
+    board[from_row][from_column] = moving_piece
+    board[to_row][to_column] = captured_piece
 
-    if is_in_check(board, turn):
+    if en_passant_move:
+        board[captured_row][captured_column] = en_passant_captured_piece
 
-        board[from_row][from_column] = moving_piece
-        board[to_row][to_column] = captured_piece
+    print("You cannot make that move because your king would be in check.")
+    continue
 
-        print("You cannot make that move because your king would be in check.")
-        continue
+    last_move = {
+        "piece" : moving_piece,
+        "from_row" : from_row,
+        "to_row" : to_row,
+        "from_column" : from_column,
+        "to_column" : to_column,
+    }
+        
+
 
 
     promote_pawn(board, to_row, to_column)
@@ -813,7 +921,7 @@ while game_running:
 
     else:
 
-        if not has_legal_move(board, turn):
+        if not has_legal_move(board, turn, last_move):
 
             print("Stalemate!")
             game_running = False
