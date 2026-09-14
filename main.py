@@ -28,6 +28,15 @@ turn = "white"
 game_running = True
 last_move = None
 
+white_king_moved = False
+black_king_moved = False
+
+white_left_rook_moved = False
+white_right_rook_moved = False
+
+black_left_rook_moved = False   
+black_right_rook_moved = False
+
 
 def print_board():
 
