@@ -1,5 +1,3 @@
-from ast import While
-
 
 board = [
     ["♜", "♞", "♝", "♛", "♚", "♝", "♞", "♜"],
@@ -824,48 +822,48 @@ while game_running:
 
     en_passant_move = is_valid_en_passant(board, from_row, from_column, to_row, to_column, turn, last_move)
 
-if en_passant_move:
+    if en_passant_move:
 
-    captured_row = from_row
-    captured_column = to_column
-    en_passant_captured_piece = board[captured_row][captured_column]
+        captured_row = from_row
+        captured_column = to_column
+        en_passant_captured_piece = board[captured_row][captured_column]
 
 
-else:
-    captured_row = None
-    captured_column = None
-    en_passant_captured_piece = None
-
-if en_passant_move:
-
-    perform_en_passant(
-        board,
-        from_row,
-        from_column,
-        to_row,
-        to_column
-    )
-
-else:
-
-    move_piece(
-        board,
-        from_row,
-        from_column,
-        to_row,
-        to_column
-    )
-
-if is_in_check(board, turn):
-
-    board[from_row][from_column] = moving_piece
-    board[to_row][to_column] = captured_piece
+    else:
+        captured_row = None
+        captured_column = None
+        en_passant_captured_piece = None
 
     if en_passant_move:
-        board[captured_row][captured_column] = en_passant_captured_piece
 
-    print("You cannot make that move because your king would be in check.")
-    continue
+        perform_en_passant(
+            board,
+            from_row,
+            from_column,
+            to_row,
+            to_column
+        )
+
+    else:
+
+        move_piece(
+            board,
+            from_row,
+            from_column,
+            to_row,
+            to_column
+        )
+
+    if is_in_check(board, turn):
+
+        board[from_row][from_column] = moving_piece
+        board[to_row][to_column] = captured_piece
+
+        if en_passant_move:
+            board[captured_row][captured_column] = en_passant_captured_piece
+
+        print("You cannot make that move because your king would be in check.")
+        continue
 
     last_move = {
         "piece" : moving_piece,
@@ -880,7 +878,12 @@ if is_in_check(board, turn):
 
     promote_pawn(board, to_row, to_column)
 
-    if captured_piece != "·":
+    if en_passant_move:
+        print(f"{moving_piece} captured {en_passant_captured_piece} en passant on {to_square}.")
+
+
+
+    elif captured_piece != "·":
 
         print(
             f"{moving_piece} captured "
