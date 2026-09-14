@@ -388,6 +388,86 @@ def is_valid_king_move(
 
     return True
 
+def is_valid_castling(board, from_row, from_column, to_row, to_column, turn, king_moved, rook_moved):
+    if abs(to_column - from_column) != 2
+        return False
+
+    if king_moved:
+        return False
+
+    piece = board[from_row][from_column]
+
+    if turn == "white" and piece != "♔":
+        return False
+
+    if turn == "black" and piece != "♚":
+        return False
+
+    if turn == "white" and from_row != 7:
+        return False
+
+    if turn == "black" and from_row != 0:
+        return False
+
+    if to_column > from_column:
+        king_side = True
+
+    else:
+        king_side = False
+
+    if rook_moved:
+        return False
+
+    if king_side:
+        rook_column = 7
+
+    else:
+        rook_column = 0
+
+    rook = board[from_row][rook_column]
+
+    if turn == "white" and rook != "♖":
+        return False
+
+    if turn == "black" and rook != "♜":
+        return False
+
+        if kingside:
+
+            if board[from_row][5] != "·":
+                return False
+
+            if board[from_row][6] != "·":
+                return False
+
+    else:
+
+        if board[from_row][1] != "·":
+            return False
+
+        if board[from_row][2] != "·":
+            return False
+
+        if board[from_row][3] != "·":
+            return False
+
+
+        if is_square_attacked(board, from_row, from_column,  "black" if turn == "white" else "white"):
+            return False
+
+        if king_side:
+            middle_column = from_column + 1
+
+        else:
+            middle_column = from_column - 1
+
+        if is_square_attacked(board, from_row, middle_column, "black" if turn == "white" else "white"):
+            return False
+
+        if is_square_attacked(board, to_row, to_column, "black" if turn == "white" else "white"):
+            return False
+
+        return True
 
 def is_valid_move(
     board,
@@ -395,7 +475,7 @@ def is_valid_move(
     from_row,
     from_column,
     to_row,
-    to_column,turn,last_move
+    to_column,turn,last_move,king_moved,rook_moved
 ):
 
     if piece == "♙" or piece == "♟":
