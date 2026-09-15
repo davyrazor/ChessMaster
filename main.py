@@ -31,11 +31,11 @@ last_move = None
 white_king_moved = False
 black_king_moved = False
 
-white_left_rook_moved = False
-white_right_rook_moved = False
+white_queenside_rook_moved = False
+white_kingside_rook_moved = False
 
-black_left_rook_moved = False   
-black_right_rook_moved = False
+black_queenside_rook_moved = False   
+black_kingside_rook_moved = False
 
 
 def print_board():
@@ -389,7 +389,7 @@ def is_valid_king_move(
     return True
 
 def is_valid_castling(board, from_row, from_column, to_row, to_column, turn, king_moved, rook_moved):
-    if abs(to_column - from_column) != 2
+    if abs(to_column - from_column) != 2:
         return False
 
     if king_moved:
@@ -539,15 +539,27 @@ def is_valid_move(
 
     elif piece == "♔" or piece == "♚":
 
+        if abs(to_column - from_column) == 2:
+
+            return is_valid_castling(
+                board,
+                from_row,
+                from_column,
+                to_row,
+                to_column,
+                turn,
+                king_moved,
+                rook_moved
+            )
+
         return is_valid_king_move(
             board,
+            piece,
             from_row,
             from_column,
             to_row,
             to_column
         )
-
-    return False
 
 
 def is_square_attacked(
@@ -715,7 +727,7 @@ def has_legal_move(board, color, last_move):
                         row,
                         column,
                         to_row,
-                        to_column,color, last_move
+                        to_column,color, last_move, False, False
                     )
 
                     if not valid_move:
@@ -816,6 +828,36 @@ def perform_en_passant(board, from_row, from_column, to_row, to_column):
     board[from_row][from_column] = "·"
     board[captured_row][captured_column] = "·"
 
+def perform_castling(
+    board,
+    from_row,
+    from_column,
+    to_row,
+    to_column
+):
+
+    # Move the king
+    board[to_row][to_column] = board[from_row][from_column]
+    board[from_row][from_column] = "·"
+
+    # Kingside castling
+    if to_column > from_column:
+
+        rook_from_column = 7
+        rook_to_column = 5
+
+    # Queenside castling
+    else:
+
+        rook_from_column = 0
+        rook_to_column = 3
+
+    # Move the rook
+    board[from_row][rook_to_column] = board[from_row][rook_from_column]
+    board[from_row][rook_from_column] = "·"
+
+
+
 while game_running:
 
     print()
@@ -885,7 +927,23 @@ while game_running:
             continue
 
 
-    # Check movement rules
+    if turn == "white":
+        king_moved = white_king_moved
+
+    else:
+        king_moved = black_king_moved
+
+    if turn == "white":
+        if to_row > from_row:
+            rook_moved = white_kingside_rook_moved
+        else:
+            rook_moved = white_queenside_rook_moved
+
+    else:
+        if to_row > from_row:
+            rook_moved = black_kingside_rook_moved
+        else:
+            rook_moved = black_queenside_rook_moved
 
     valid_move = is_valid_move(
         board,
@@ -893,7 +951,7 @@ while game_running:
         from_row,
         from_column,
         to_row,
-        to_column,turn,last_move
+        to_column,turn,last_move, king_moved, rook_moved
     )
 
 
