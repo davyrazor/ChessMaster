@@ -966,6 +966,10 @@ while game_running:
     moving_piece = board[from_row][from_column]
     captured_piece = board[to_row][to_column]
 
+    castling_move = (
+        piece == "♔" or piece == "♚"
+    ) and abs(to_column - from_column) == 2
+
 
     en_passant_move = is_valid_en_passant(board, from_row, from_column, to_row, to_column, turn, last_move)
 
